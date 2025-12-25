@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Payment | AdConnect</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Premium UI -->
+    <link rel="stylesheet" href="../assets/css/ui.css">
+
+    <!-- Razorpay -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+
+<section class="container center">
+    <div class="card" style="max-width:500px;margin:auto">
+        <h1>Confirm Payment</h1>
+
+        <p style="margin:16px 0">
+            Complete your payment to confirm the advertising space
+            and lock this property for your campaign.
+        </p>
+
+        <div style="margin:24px 0">
+            <p><strong>Property:</strong> <span id="propertyTitle">—</span></p>
+            <p><strong>Amount:</strong> ₹<span id="amount">—</span></p>
+        </div>
+
+        <button class="btn btn-primary" style="width:100%" onclick="payNow()">
+            Pay Securely
+        </button>
+    </div>
+</section>
+
+<script src="../assets/js/config.js"></script>
+
+<script>
+    const token = localStorage.getItem('token');
+    const params = new URLSearchParams(window.location.search);
+    const requestId = params.get('requestId');
+    const amount = params.get('amount');
+    const title = params.get('title');
+
+    document.getElementById('amount').innerText = amount;
+    document.getElementById('propertyTitle').innerText = title;
+
+    function payNow() {
+      fetch(`${API_BASE_URL}/api/payments/create-order`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token
+        },
+        body: JSON.stringify({ amount, request_id: requestId })
+      })
+      .then(res => res.json())
+      .then(order => {
+        const options = {
+          key: order.key,
+          amount: order.amount,
+          currency: 'INR',
+          name: 'AdConnect',
+          description: 'Ad Space Booking',
+          order_id: order.orderId,
+          handler: function (response) {
+            verifyPayment(response);
+          }
+        };
+
+        new Razorpay(options).open();
+      })
+      .catch(() => alert('Payment initiation failed'));
+    }
+
+    function verifyPayment(response) {
+      fetch(`${API_BASE_URL}/api/payments/verify`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token
+        },
+        body: JSON.stringify(response)
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert(data.message || 'Payment successful');
+        window.location.href = 'dashboard.html';
+      })
+      .catch(() => alert('Payment verification failed'));
+    }
+</script>
+
+</body>
+</html>
