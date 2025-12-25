@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard | AdConnect</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Premium UI -->
+    <link rel="stylesheet" href="../assets/css/ui.css">
+</head>
+<body>
+
+<!-- HEADER -->
+<section class="container">
+    <h1>Admin Control Panel</h1>
+    <p style="margin-top:16px">
+        Monitor users, moderate properties, manage featured listings,
+        and oversee platform activity.
+    </p>
+</section>
+
+<!-- STATS -->
+<section class="container">
+    <div class="grid grid-3">
+        <div class="card"><h3 id="userCount">Users</h3></div>
+        <div class="card"><h3 id="propertyCount">Properties</h3></div>
+        <div class="card"><h3 id="paymentCount">Payments</h3></div>
+    </div>
+</section>
+
+<!-- PROPERTIES -->
+<section class="container">
+    <h2>Properties</h2>
+    <div id="propertyList" class="grid grid-3" style="margin-top:32px"></div>
+</section>
+
+<script src="../assets/js/config.js"></script>
+
+<script>
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      alert('Admin login required');
+      window.location.href = '../login.html';
+    }
+
+    function fetchStats() {
+      fetch(`${API_BASE_URL}/api/admin/users`, {
+        headers: { Authorization: token }
+      })
+      .then(res => res.json())
+      .then(users => {
+        document.getElementById('userCount').innerText = `👥 Users: ${users.length}`;
+      });
+
+      fetch(`${API_BASE_URL}/api/admin/properties`, {
+        headers: { Authorization: token }
+      })
+      .then(res => res.json())
+      .then(props => {
+        document.getElementById('propertyCount').innerText = `🏠 Properties: ${props.length}`;
+      });
+
+      fetch(`${API_BASE_URL}/api/admin/payments`, {
+        headers: { Authorization: token }
+      })
+      .then(res => res.json())
+      .then(payments => {
+        document.getElementById('paymentCount').innerText = `💳 Payments: ${payments.length}`;
+      });
+    }
+
+    function toggleFeatured(id, current) {
+      fetch(`${API_BASE_URL}/api/admin/feature`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token
+        },
+        body: JSON.stringify({
+          id,
+          featured: current ? 0 : 1
+        })
+      })
+      .then(res => res.json())
+      .then(() => loadProperties());
+    }
+
+    function loadProperties() {
+      fetch(`${API_BASE_URL}/api/admin/properties`, {
+        headers: { Authorization: token }
+      })
+      .then(res => res.json())
+      .then(data => {
+        const list = document.getElementById('propertyList');
+        list.innerHTML = '';
+
+        data.forEach(p => {
+          const card = document.createElement('div');
+          card.className = 'card';
+
+          card.innerHTML = `
+            <h3>${p.title}</h3>
+            <p>${p.city}, ${p.area}</p>
+            <p>₹${p.price} / month</p>
+            <p>Status: ${p.is_featured ? '⭐ Featured' : 'Standard'}</p>
+            <button class="btn btn-primary" style="margin-top:12px"
+              onclick="toggleFeatured(${p.id}, ${p.is_featured})">
+              ${p.is_featured ? 'Remove Feature' : 'Mark as Featured'}
+            </button>
+          `;
+
+          list.appendChild(card);
+        });
+      });
+    }
+
+    fetchStats();
+    loadProperties();
+</script>
+
+</body>
+</html>

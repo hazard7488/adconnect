@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Owner Dashboard | AdConnect</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Premium UI -->
+    <link rel="stylesheet" href="../assets/css/ui.css">
+</head>
+<body>
+
+<!-- HEADER -->
+<section class="container">
+    <div class="grid grid-2">
+        <div>
+            <h1>Your Properties</h1>
+            <p style="margin-top:16px">
+                Manage your listed spaces, track interest from agencies,
+                and maximize your advertising revenue.
+            </p>
+        </div>
+
+        <div style="text-align:right">
+            <button class="btn btn-primary" onclick="toggleForm()">
+                + Add New Property
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- ADD PROPERTY FORM -->
+<section class="container" id="propertyForm" style="display:none">
+    <div class="card">
+        <h2>Add Property</h2>
+
+        <div class="grid grid-2">
+            <input class="input" id="title" placeholder="Property Title">
+            <select class="input" id="property_type">
+                <option value="">Property Type</option>
+                <option value="WALL">Wall</option>
+                <option value="ROOFTOP">Rooftop</option>
+                <option value="BILLBOARD">Billboard</option>
+                <option value="SHOP">Shop Front</option>
+            </select>
+
+            <input class="input" id="city" placeholder="City">
+            <input class="input" id="area" placeholder="Area / Locality">
+
+            <input class="input" id="price" placeholder="Monthly Price">
+            <select class="input" id="price_type">
+                <option value="FIXED">Fixed</option>
+                <option value="NEGOTIABLE">Negotiable</option>
+            </select>
+        </div>
+
+        <textarea class="input" id="description" placeholder="Description"></textarea>
+
+        <button class="btn btn-primary" onclick="addProperty()">
+            Save Property
+        </button>
+    </div>
+</section>
+
+<!-- PROPERTIES LIST -->
+<section class="container">
+    <div id="propertyList" class="grid grid-3"></div>
+</section>
+
+<script src="../assets/js/config.js"></script>
+
+<script>
+    const token = localStorage.getItem('token');
+
+    function toggleForm() {
+      const form = document.getElementById('propertyForm');
+      form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function addProperty() {
+      fetch(`${API_BASE_URL}/api/properties`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token
+        },
+        body: JSON.stringify({
+          title: title.value,
+          property_type: property_type.value,
+          description: description.value,
+          city: city.value,
+          area: area.value,
+          price: price.value,
+          price_type: price_type.value
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert(data.message || 'Property added');
+        loadProperties();
+        toggleForm();
+      });
+    }
+
+    function loadProperties() {
+      fetch(`${API_BASE_URL}/api/properties`, {
+        headers: { 'Authorization': token }
+      })
+      .then(res => res.json())
+      .then(data => {
+        const list = document.getElementById('propertyList');
+        list.innerHTML = '';
+
+        data.forEach(p => {
+          const card = document.createElement('div');
+          card.className = 'card';
+
+          card.innerHTML = `
+            <h3>${p.title}</h3>
+            <p>${p.city}, ${p.area}</p>
+            <p><strong>₹${p.price}</strong> / month</p>
+            <p>Status: ${p.is_featured ? '⭐ Featured' : 'Active'}</p>
+          `;
+
+          list.appendChild(card);
+        });
+      });
+    }
+
+    loadProperties();
+</script>
+
+</body>
+</html>

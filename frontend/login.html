@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login | AdConnect</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Premium UI -->
+    <link rel="stylesheet" href="assets/css/ui.css">
+</head>
+<body>
+
+<section class="container">
+    <div class="grid grid-2">
+
+        <!-- LEFT INFO -->
+        <div>
+            <h1>Welcome back</h1>
+            <p style="margin:24px 0">
+                Log in to manage your properties, send advertising requests,
+                track campaigns, and handle payments securely.
+            </p>
+
+            <div class="card" style="margin-top:32px">
+                <h3>What you can do</h3>
+                <ul style="margin-top:16px; line-height:1.8">
+                    <li>✔ Manage listings & requests</li>
+                    <li>✔ Track impressions</li>
+                    <li>✔ Secure payments</li>
+                    <li>✔ Admin-moderated platform</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <div class="card">
+            <h2>Login</h2>
+
+            <input class="input" id="email" type="email" placeholder="Email">
+            <input class="input" id="password" type="password" placeholder="Password">
+
+            <button class="btn btn-primary" style="width:100%" onclick="login()">
+                Login
+            </button>
+
+            <p style="margin-top:16px">
+                Don’t have an account?
+                <a href="signup.html">Create one</a>
+            </p>
+        </div>
+
+    </div>
+</section>
+
+<script src="assets/js/config.js"></script>
+
+<script>
+    function login() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      if (!email || !password) {
+        alert('Email and password are required');
+        return;
+      }
+
+      fetch(`${API_BASE_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (!data.token) {
+          alert(data.message || 'Login failed');
+          return;
+        }
+
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('role', data.role);
+
+        if (data.role === 'OWNER') {
+          window.location.href = 'owner/dashboard.html';
+        } else if (data.role === 'AGENCY') {
+          window.location.href = 'agency/dashboard.html';
+        } else if (data.role === 'ADMIN') {
+          window.location.href = 'admin/dashboard.html';
+        }
+      })
+      .catch(() => alert('Login error'));
+    }
+</script>
+
+</body>
+</html>

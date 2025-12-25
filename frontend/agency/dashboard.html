@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Agency Dashboard | AdConnect</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Premium UI -->
+    <link rel="stylesheet" href="../assets/css/ui.css">
+</head>
+<body>
+
+<!-- HEADER -->
+<section class="container">
+    <div class="grid grid-2">
+        <div>
+            <h1>Explore Ad Spaces</h1>
+            <p style="margin-top:16px">
+                Browse premium advertising spaces listed by verified home owners.
+                Send requests and launch high-impact campaigns.
+            </p>
+        </div>
+
+        <div style="text-align:right">
+      <span class="card" style="display:inline-block">
+        🔎 Map-based discovery coming soon
+      </span>
+        </div>
+    </div>
+</section>
+
+<!-- PROPERTIES GRID -->
+<section class="container">
+    <div id="propertyGrid" class="grid grid-3"></div>
+</section>
+
+<script src="../assets/js/config.js"></script>
+
+<script>
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      alert('Please login again');
+      window.location.href = '../login.html';
+    }
+
+    function sendRequest(propertyId) {
+      fetch(`${API_BASE_URL}/api/requests`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token
+        },
+        body: JSON.stringify({ property_id: propertyId })
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert(data.message || 'Request sent');
+      })
+      .catch(() => alert('Request failed'));
+    }
+
+    function loadProperties() {
+      fetch(`${API_BASE_URL}/api/properties`, {
+        headers: { 'Authorization': token }
+      })
+      .then(res => res.json())
+      .then(data => {
+        const grid = document.getElementById('propertyGrid');
+        grid.innerHTML = '';
+
+        data.forEach(p => {
+          const card = document.createElement('div');
+          card.className = 'card';
+
+          card.innerHTML = `
+            <h3>${p.title}</h3>
+            <p>${p.city}, ${p.area}</p>
+            <p style="margin:12px 0">
+              <strong>₹${p.price}</strong> / month
+            </p>
+            <p style="font-size:14px">
+              ${p.is_featured ? '⭐ Featured Property' : 'Standard Listing'}
+            </p>
+            <button class="btn btn-primary" style="margin-top:16px"
+              onclick="sendRequest(${p.id})">
+              Send Request
+            </button>
+          `;
+
+          grid.appendChild(card);
+        });
+      });
+    }
+
+    loadProperties();
+</script>
+
+</body>
+</html>
