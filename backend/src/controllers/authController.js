@@ -2,9 +2,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const pool = require("../config/db");
 
-/**
- * SIGNUP
- */
+/* ================= SIGNUP ================= */
 exports.signup = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
@@ -12,21 +10,20 @@ exports.signup = async (req, res) => {
     if (!name || !email || !password || !role) {
       return res.status(400).json({
         success: false,
-        message: "All fields are required",
+        message: "All fields are required"
       });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await pool.query(
-      `INSERT INTO users (name, email, password, role)
-       VALUES (?, ?, ?, ?)`,
+      "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)",
       [name, email, hashedPassword, role]
     );
 
     return res.status(201).json({
       success: true,
-      message: "Signup successful",
+      message: "Signup successful"
     });
 
   } catch (err) {
@@ -35,20 +32,18 @@ exports.signup = async (req, res) => {
     if (err.code === "ER_DUP_ENTRY") {
       return res.status(400).json({
         success: false,
-        message: "Email already registered",
+        message: "Email already registered. Please login."
       });
     }
 
     return res.status(500).json({
       success: false,
-      message: "Signup failed",
+      message: "Signup failed"
     });
   }
 };
 
-/**
- * LOGIN
- */
+/* ================= LOGIN ================= */
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -56,7 +51,7 @@ exports.login = async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: "Email and password required",
+        message: "Email and password required"
       });
     }
 
@@ -68,7 +63,7 @@ exports.login = async (req, res) => {
     if (rows.length === 0) {
       return res.status(400).json({
         success: false,
-        message: "Invalid email or password",
+        message: "Invalid email or password"
       });
     }
 
@@ -78,7 +73,7 @@ exports.login = async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({
         success: false,
-        message: "Invalid email or password",
+        message: "Invalid email or password"
       });
     }
 
@@ -92,14 +87,14 @@ exports.login = async (req, res) => {
       success: true,
       message: "Login successful",
       token,
-      role: user.role,
+      role: user.role
     });
 
   } catch (err) {
     console.error("Login error:", err);
     return res.status(500).json({
       success: false,
-      message: "Login failed",
+      message: "Login failed"
     });
   }
 };
