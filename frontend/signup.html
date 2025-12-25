@@ -1,62 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Signup | AdConnect</title>
-    <link rel="stylesheet" href="./assets/css/ui.css">
+  <meta charset="UTF-8">
+  <title>Signup | AdConnect</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: "Inter", system-ui, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #FAF7F2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #2E2E2E;
+    }
+
+    .card {
+      width: 380px;
+      background: #FFFFFF;
+      padding: 36px 32px;
+      border-radius: 16px;
+      box-shadow:
+        0 20px 40px rgba(0,0,0,0.08),
+        0 6px 12px rgba(0,0,0,0.05);
+    }
+
+    h2 {
+      margin-bottom: 24px;
+      font-size: 26px;
+      font-weight: 600;
+      color: #6B7C93;
+      text-align: center;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+      border-radius: 10px;
+      border: 1px solid #DDD;
+      font-size: 15px;
+      outline: none;
+    }
+
+    input:focus, select:focus {
+      border-color: #6B7C93;
+      box-shadow: 0 0 0 3px rgba(107,124,147,0.15);
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #6B7C93, #8A9BB5);
+      color: #FFF;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(107,124,147,0.35);
+    }
+
+    p {
+      margin-top: 18px;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    a {
+      color: #C9B37E;
+      text-decoration: none;
+      font-weight: 500;
+    }
+  </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>Create Account</h2>
+  <h2>Create Account</h2>
 
-    <input id="name" placeholder="Full Name">
-    <input id="email" type="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Password">
+  <input id="name" placeholder="Full Name">
+  <input id="email" type="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
 
-    <select id="role">
-        <option value="">Select Role</option>
-        <option value="OWNER">Home Owner</option>
-        <option value="AGENCY">Marketing Agency</option>
-    </select>
+  <select id="role">
+    <option value="">Select Role</option>
+    <option value="OWNER">Home Owner</option>
+    <option value="AGENCY">Marketing Agency</option>
+  </select>
 
-    <button onclick="signup()">Sign Up</button>
-    <p>Already have an account? <a href="login.html">Login</a></p>
+  <button onclick="signup()">Sign Up</button>
+
+  <p>
+    Already have an account?
+    <a href="login.html">Login</a>
+  </p>
 </div>
 
-<script src="assets/js/config.js"></script>
+<script src="./assets/js/config.js"></script>
 <script>
-    function signup() {
-      const name = nameInput();
-      const email = emailInput();
-      const password = passwordInput();
-      const role = document.getElementById("role").value;
+function signup() {
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const role = document.getElementById("role").value;
 
-      if (!name || !email || !password || !role) {
-        alert("All fields are required");
-        return;
-      }
+  if (!name || !email || !password || !role) {
+    alert("All fields are required");
+    return;
+  }
 
-      fetch(`${API_BASE_URL}/api/auth/signup`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, role })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          alert("Signup successful. Please login.");
-          window.location.href = "login.html";
-        } else {
-          alert(data.message);
-        }
-      })
-      .catch(() => alert("Signup failed"));
+  fetch(`${API_BASE_URL}/api/auth/signup`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, email, password, role })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      alert("Signup successful! Please login.");
+      window.location.href = "login.html";
+    } else {
+      alert(data.message);
     }
-
-    function nameInput() { return document.getElementById("name").value.trim(); }
-    function emailInput() { return document.getElementById("email").value.trim(); }
-    function passwordInput() { return document.getElementById("password").value.trim(); }
+  })
+  .catch(() => alert("Signup failed"));
+}
 </script>
 
 </body>
