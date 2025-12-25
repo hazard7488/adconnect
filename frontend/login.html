@@ -59,38 +59,39 @@
 
 <script>
     function login() {
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value.trim();
 
-      if (!email || !password) {
-        alert('Email and password are required');
-        return;
-      }
-
-      fetch(`${API_BASE_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (!data.token) {
-          alert(data.message || 'Login failed');
-          return;
+        if (!email || !password) {
+            alert('Email and password are required');
+            return;
         }
 
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('role', data.role);
+        fetch(`${API_BASE_URL}/api/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('role', data.role);
 
-        if (data.role === 'OWNER') {
-          window.location.href = 'owner/dashboard.html';
-        } else if (data.role === 'AGENCY') {
-          window.location.href = 'agency/dashboard.html';
-        } else if (data.role === 'ADMIN') {
-          window.location.href = 'admin/dashboard.html';
-        }
-      })
-      .catch(() => alert('Login error'));
+                if (data.role === 'OWNER') {
+                    window.location.href = 'owner/dashboard.html';
+                } else if (data.role === 'AGENCY') {
+                    window.location.href = 'agency/dashboard.html';
+                } else if (data.role === 'ADMIN') {
+                    window.location.href = 'admin/dashboard.html';
+                }
+            } else {
+                alert(data.message || 'Login failed');
+            }
+        })
+        .catch(() => {
+            alert('Login failed');
+        });
     }
 </script>
 
